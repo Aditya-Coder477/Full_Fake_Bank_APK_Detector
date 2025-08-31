@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+.env
+.venv/
+
+# Node / React Native
+node_modules/
+npm-debug.log
+yarn-error.log
+.expo/
+dist/
+build/
+
+# VS Code
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db

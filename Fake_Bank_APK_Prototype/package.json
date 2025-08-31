@@ -1,0 +1,30 @@
+{
+  "name": "fake_bank_apk_prototype",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "android:dev": "APP_ENV=development react-native run-android",
+    "android:prod": "APP_ENV=production react-native run-android",
+    "start:dev": "APP_ENV=development react-native start",
+    "start:prod": "APP_ENV=production react-native start",
+    "build:android:dev": "APP_ENV=development ./scripts/build-android.sh",
+    "build:android:prod": "APP_ENV=production ./scripts/build-android.sh",
+    "android:dev": "node scripts/set-env.js development && react-native run-android",
+    "android:prod": "node scripts/set-env.js production && react-native run-android",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
+    "react-native-dotenv": "^3.4.11"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

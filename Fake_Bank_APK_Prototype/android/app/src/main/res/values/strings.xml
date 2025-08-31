@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ai Shakti</string>
+    <string name="title_activity_main">Ai Shakti</string>
+    <string name="package_name">com.RakshaSoma.AiShakti</string>
+    <string name="custom_url_scheme">com.RakshaSoma.AiShakti</string>
+</resources>

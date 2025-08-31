@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake APK Detector</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container-main {
+            max-width: 800px;
+        }
+        /* Custom styling for icons/effects */
+        .scan-button {
+            transition: transform 0.2s ease-in-out;
+        }
+        .scan-button:hover {
+            transform: scale(1.05);
+        }
+        .scan-animation {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(29, 78, 216, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(29, 78, 216, 0); }
+        }
+        /* For the animated background */
+        .animated-bg {
+            background: linear-gradient(-45deg, #1e3a8a, #3b82f6, #06b6d4);
+            background-size: 400% 400%;
+            animation: gradient-shift 15s ease infinite;
+        }
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Main Container -->
+    <div class="container-main w-full bg-white rounded-2xl shadow-2xl overflow-hidden p-6 md:p-10 border border-gray-200">
+
+        <!-- Header and Intro -->
+        <header class="text-center mb-10">
+            <div class="flex items-center justify-center mb-4">
+                <svg class="w-16 h-16 text-blue-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">Fake APK Detector</h1>
+            <p class="text-lg text-gray-600">A demo showcasing a mobile security app for the Gen AI Exchange Hackathon.</p>
+        </header>
+
+        <!-- Main Content Area -->
+        <main>
+            <!-- File Upload Simulation & Input -->
+            <div class="mb-8">
+                <p class="text-sm text-center text-gray-500 mb-4">Simulated APK Upload. Enter a package name to begin scanning.</p>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <input type="text" id="packageInput" placeholder="Enter package name (e.g., com.sbi.lotusintouch)" class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow">
+                    <button id="scanButton" class="scan-button bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        Scan APK
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard/Summary Section -->
+            <section id="dashboard" class="mb-10">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="bg-blue-50 p-6 rounded-xl shadow-inner border border-blue-200">
+                        <p class="text-gray-500 text-sm mb-1">Fakes Blocked</p>
+                        <p class="text-4xl font-extrabold text-blue-800">14</p>
+                    </div>
+                    <div class="bg-blue-50 p-6 rounded-xl shadow-inner border border-blue-200">
+                        <p class="text-gray-500 text-sm mb-1">Suspicious Activity</p>
+                        <p class="text-4xl font-extrabold text-yellow-500">3</p>
+                    </div>
+                    <div class="bg-blue-50 p-6 rounded-xl shadow-inner border border-blue-200">
+                        <p class="text-gray-500 text-sm mb-1">Active Scams</p>
+                        <p class="text-4xl font-extrabold text-red-500">2</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Result Report Section -->
+            <section id="report" class="hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Scan Report</h2>
+                    <div id="statusBadge" class="px-4 py-1 rounded-full font-bold text-sm"></div>
+                </div>
+                <div id="reportContent" class="bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200">
+                    <!-- Report details will be injected here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Custom Modal for Pre-installation Blocker -->
+    <div id="blockerModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+        <div class="bg-red-100 p-8 rounded-2xl shadow-lg w-full max-w-sm text-center border border-red-300">
+            <div class="flex items-center justify-center text-red-500 mb-4">
+                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-extrabold text-red-700 mb-2">Malicious App Detected!</h3>
+            <p class="text-red-600 mb-4">This APK has been flagged as highly malicious and is a significant security risk. We recommend you **DO NOT** install this app.</p>
+            <button id="closeBlockerModal" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                Acknowledge
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // Start with a clean slate
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('report').classList.add('hidden');
+        });
+
+        // The CSV data is hard-coded into a JS object for this demo.
+        // In a real app, this would be fetched from a database.
+        const legitApps = {
+            "com.sbi.lotusintouch": {
+                "App Name": "YONO SBI UK",
+                "Package Name (ID)": "com.sbi.lotusintouch",
+                "Version Code": "3.5.1",
+                "Version Name": "3.5.1",
+                "Source URL": "YONO SBI UK - Apps on Google Play",
+                "Label": "Legit",
+                "Certificate Hash (SHA-256)": "a123b456c789d0ef1234567890abcdef",
+                "Certificate Issuer": "C=US, O=Symantec Corporation, CN=Symantec Root for Code Signing",
+                "Signing Algorithm": "rsassa_pkcs1v15",
+                "Dangerous Permissions Count": 0,
+                "Sensitive Permissions List": "None",
+                "Number of Services": 2,
+                "Number of Broadcast Receivers": 1,
+                "Number of Activities": 50,
+                "Embedded URLs": "secure.sbi.co.in",
+                "Suspicious Domains Present": "No",
+                "Use of HTTPS": "Secure",
+                "Tries to Access SMS/OTP": "No",
+                "Attempts Network Connection at Start": "Yes",
+                "File Size (MB)": 92,
+                "Number of Libraries Imported": 10,
+                "Min SDK": 26,
+                "Target SDK": 34
+            },
+            "com.canarabank.mobility": {
+                "App Name": "Canara ai1",
+                "Package Name (ID)": "com.canarabank.mobility",
+                "Version Code": "3.6.38",
+                "Version Name": "3.6.38",
+                "Source URL": "Canara ai1- Mobile Banking App - Apps on Google Play",
+                "Label": "Legit",
+                "Certificate Hash (SHA-256)": "b234c567d890e1f234567890abcdef12",
+                "Certificate Issuer": "C=US, ST=California, L=Mountain View, O=Google Inc., OU=Android, CN=Android",
+                "Signing Algorithm": "rsassa_pkcs1v15",
+                "Dangerous Permissions Count": 0,
+                "Sensitive Permissions List": "None",
+                "Number of Services": 4,
+                "Number of Broadcast Receivers": 2,
+                "Number of Activities": 60,
+                "Embedded URLs": "mobile.canarabank.co.in",
+                "Suspicious Domains Present": "No",
+                "Use of HTTPS": "Secure",
+                "Tries to Access SMS/OTP": "No",
+                "Attempts Network Connection at Start": "Yes",
+                "File Size (MB)": 48.44,
+                "Number of Libraries Imported": 28,
+                "Min SDK": 28,
+                "Target SDK": 34
+            },
+            "com.idfcfirstbank.optimus": {
+                "App Name": "IDFC FIRST Bank",
+                "Package Name (ID)": "com.idfcfirstbank.optimus",
+                "Version Code": "2.43",
+                "Version Name": "2.43",
+                "Source URL": "IDFC FIRST Bank: MobileBanking - Apps on Google Play",
+                "Label": "Legit",
+                "Certificate Hash (SHA-256)": "c345d678e901f234567890abcdef1234",
+                "Certificate Issuer": "O=IDFC FIRST BANK",
+                "Signing Algorithm": "rsassa_pkcs1v15",
+                "Dangerous Permissions Count": 0,
+                "Sensitive Permissions List": "None",
+                "Number of Services": 3,
+                "Number of Broadcast Receivers": 2,
+                "Number of Activities": 55,
+                "Embedded URLs": "secure.idfcfirstbank.com",
+                "Suspicious Domains Present": "No",
+                "Use of HTTPS": "Secure",
+                "Tries to Access SMS/OTP": "No",
+                "Attempts Network Connection at Start": "Yes",
+                "File Size (MB)": 63,
+                "Number of Libraries Imported": 20,
+                "Min SDK": 28,
+                "Target SDK": 35
+            }
+        };
+
+        // Simulated fake APKs and their properties for the demo
+        const fakeApps = {
+            "com.sbi.diwalicashback": {
+                "App Name": "YONO SBI Diwali Bonus",
+                "Package Name (ID)": "com.sbi.diwalicashback",
+                "Label": "Fake",
+                "Certificate Hash (SHA-256)": "a223c456d789e0f1234567890abcefg1",
+                "Certificate Issuer": "CN=Android",
+                "Signing Algorithm": "sha1withrsa",
+                "Dangerous Permissions Count": 5,
+                "Sensitive Permissions List": "READ_SMS, READ_CONTACTS, SYSTEM_ALERT_WINDOW",
+                "Number of Services": 10,
+                "Number of Broadcast Receivers": 7,
+                "Number of Activities": 5,
+                "Embedded URLs": "sbi-bonus.in, yono-diwali.info",
+                "Suspicious Domains Present": "Yes",
+                "Use of HTTPS": "Insecure",
+                "Tries to Access SMS/OTP": "Yes",
+                "Attempts Network Connection at Start": "Yes",
+                "File Size (MB)": 5,
+                "Number of Libraries Imported": 2,
+                "Min SDK": 21,
+                "Target SDK": 28
+            },
+            "com.hdfc.loan.instant": {
+                "App Name": "HDFC Instant Loan",
+                "Package Name (ID)": "com.hdfc.loan.instant",
+                "Label": "Fake",
+                "Certificate Hash (SHA-256)": "b534d678e901f234567890abcdef1234",
+                "Certificate Issuer": "CN=Self-Signed",
+                "Signing Algorithm": "sha256withrsa",
+                "Dangerous Permissions Count": 8,
+                "Sensitive Permissions List": "READ_SMS, CALL_PHONE, RECEIVE_BOOT_COMPLETED, READ_PHONE_STATE",
+                "Number of Services": 12,
+                "Number of Broadcast Receivers": 8,
+                "Number of Activities": 8,
+                "Embedded URLs": "hdfcloan.pro, cash-fast.top",
+                "Suspicious Domains Present": "Yes",
+                "Use of HTTPS": "Insecure",
+                "Tries to Access SMS/OTP": "Yes",
+                "Attempts Network Connection at Start": "Yes",
+                "File Size (MB)": 15,
+                "Number of Libraries Imported": 5,
+                "Min SDK": 24,
+                "Target SDK": 29
+            }
+        };
+        
+        // Function to calculate a simulated risk score and its factors
+        function calculateRiskScore(apkData) {
+            let score = 0;
+            const factors = [];
+            
+            // Rule 1: Is the APK a known fake?
+            if (apkData["Label"] === "Fake") {
+                score += 40;
+                factors.push({ name: "Matches Known Fake Signature", points: 40 });
+            }
+
+            // Rule 2: Dangerous permissions
+            const permPoints = apkData["Dangerous Permissions Count"] * 5;
+            if (permPoints > 0) {
+                score += permPoints;
+                factors.push({ name: "High number of Dangerous Permissions", points: permPoints });
+            }
+
+            // Rule 3: Suspicious domains
+            if (apkData["Suspicious Domains Present"] === "Yes") {
+                score += 25;
+                factors.push({ name: "Suspicious Domains Embedded", points: 25 });
+            }
+
+            // Rule 4: Insecure HTTPS usage
+            if (apkData["Use of HTTPS"] === "Insecure") {
+                score += 10;
+                factors.push({ name: "Insecure HTTPS Usage", points: 10 });
+            }
+
+            // Rule 5: Low number of Activities
+            if (apkData["Number of Activities"] < 10) {
+                const activityPoints = 15;
+                score += activityPoints;
+                factors.push({ name: "Unusually low number of Activities", points: activityPoints });
+            }
+
+            // Rule 6: Scam Keywords (simulated)
+            const lowerCaseName = apkData["App Name"].toLowerCase();
+            if (lowerCaseName.includes("diwali") || lowerCaseName.includes("bonus") || lowerCaseName.includes("cashback") || lowerCaseName.includes("loan")) {
+                const keywordPoints = 20;
+                score += keywordPoints;
+                factors.push({ name: "Scam Keywords in App Name", points: keywordPoints });
+            }
+
+            // Ensure score is capped at 100
+            score = Math.min(100, score);
+            
+            return { score, factors };
+        }
+
+        // Main function to handle the scan button click
+        document.getElementById('scanButton').addEventListener('click', () => {
+            const packageInput = document.getElementById('packageInput').value.trim();
+            const reportSection = document.getElementById('report');
+            const statusBadge = document.getElementById('statusBadge');
+            const blockerModal = document.getElementById('blockerModal');
+
+            if (!packageInput) {
+                // Use a simple modal or alert() as a fallback for user-facing messages
+                const alertMessage = "Please enter a package name to scan.";
+                const alertModal = document.createElement('div');
+                alertModal.className = "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50";
+                alertModal.innerHTML = `
+                    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm text-center border border-gray-300">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Error</h3>
+                        <p>${alertMessage}</p>
+                        <button class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg mt-4" onclick="this.parentElement.parentElement.remove()">OK</button>
+                    </div>
+                `;
+                document.body.appendChild(alertModal);
+                return;
+            }
+
+            // Simulate loading state
+            reportSection.classList.add('hidden');
+            const originalButtonText = document.getElementById('scanButton').innerHTML;
+            document.getElementById('scanButton').innerHTML = `
+                <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m16.035 3.582l-5.657 5.657-1.414 1.414L10 21.414"></path></svg>
+                Scanning...
+            `;
+            document.getElementById('scanButton').disabled = true;
+
+            setTimeout(() => {
+                let apkData;
+                let riskResult;
+                
+                // Case 1: Known Legit App
+                if (legitApps[packageInput]) {
+                    apkData = legitApps[packageInput];
+                    riskResult = { score: 0, factors: [] };
+                } 
+                // Case 2: Known Fake App
+                else if (fakeApps[packageInput]) {
+                    apkData = fakeApps[packageInput];
+                    riskResult = calculateRiskScore(apkData);
+                    // Show blocker modal for malicious apps
+                    if (riskResult.score >= 70) {
+                        blockerModal.classList.remove('hidden');
+                    }
+                }
+                // Case 3: Unknown App (simulated fake)
+                else {
+                    const dangerousPermissions = ["READ_SMS", "RECEIVE_SMS", "CALL_PHONE", "SYSTEM_ALERT_WINDOW"];
+                    const randomDangerousCount = Math.floor(Math.random() * 5) + 3;
+                    const sensitiveList = dangerousPermissions.slice(0, randomDangerousCount).join(', ');
+
+                    apkData = {
+                        "App Name": packageInput.split('.').pop().replace(/([a-z])([A-Z])/g, '$1 $2'),
+                        "Package Name (ID)": packageInput,
+                        "Version Code": "1.0",
+                        "Version Name": "1.0",
+                        "Source URL": "Unverified Source",
+                        "Label": "Fake",
+                        "Certificate Hash (SHA-256)": "a" + Math.random().toString(16).substr(2, 30),
+                        "Certificate Issuer": "CN=Fake Developer",
+                        "Signing Algorithm": "sha1withrsa",
+                        "Dangerous Permissions Count": randomDangerousCount,
+                        "Sensitive Permissions List": sensitiveList,
+                        "Number of Services": Math.floor(Math.random() * 10),
+                        "Number of Broadcast Receivers": Math.floor(Math.random() * 5),
+                        "Number of Activities": Math.floor(Math.random() * 15),
+                        "Embedded URLs": "random-scam.com",
+                        "Suspicious Domains Present": "Yes",
+                        "Use of HTTPS": "Insecure",
+                        "Tries to Access SMS/OTP": "Yes",
+                        "Attempts Network Connection at Start": "Yes",
+                        "File Size (MB)": Math.floor(Math.random() * 20),
+                        "Number of Libraries Imported": Math.floor(Math.random() * 5),
+                        "Min SDK": 21,
+                        "Target SDK": 26
+                    };
+                    riskResult = calculateRiskScore(apkData);
+                    if (riskResult.score >= 70) {
+                        blockerModal.classList.remove('hidden');
+                    }
+                }
+                
+                // Render the report
+                renderReport(apkData, riskResult.score, riskResult.factors);
+
+                // Reset button state
+                document.getElementById('scanButton').innerHTML = originalButtonText;
+                document.getElementById('scanButton').disabled = false;
+            }, 1500); // Simulate network latency/scan time
+        });
+
+        // Function to render the detailed report
+        function renderReport(apkData, riskScore, factors) {
+            const reportContent = document.getElementById('reportContent');
+            const statusBadge = document.getElementById('statusBadge');
+            const reportSection = document.getElementById('report');
+
+            // Set status badge color and text
+            let statusText = "Safe";
+            let statusClass = "bg-green-100 text-green-700 border border-green-300";
+            if (apkData["Label"] === "Fake") {
+                statusText = "Fake";
+                statusClass = "bg-red-100 text-red-700 border border-red-300";
+            }
+            if (riskScore > 30 && riskScore < 70) {
+                statusText = "Suspicious";
+                statusClass = "bg-yellow-100 text-yellow-700 border border-yellow-300";
+            } else if (riskScore >= 70) {
+                statusText = "Malicious";
+                statusClass = "bg-red-100 text-red-700 border border-red-300";
+            }
+            
+            statusBadge.textContent = statusText;
+            statusBadge.className = "px-4 py-1 rounded-full font-bold text-sm " + statusClass;
+            reportSection.classList.remove('hidden');
+            
+            // Build risk score breakdown HTML
+            let factorsHtml = factors.map(f => `
+                <div class="flex justify-between items-center bg-gray-100 p-3 rounded-md">
+                    <p class="text-sm font-medium text-gray-700">${f.name}</p>
+                    <span class="text-sm font-bold text-red-600">+${f.points}</span>
+                </div>
+            `).join('');
+            if (factors.length === 0) {
+                factorsHtml = `<p class="text-gray-500 text-center">No risk factors detected. Score is 0.</p>`;
+            }
+
+            let htmlContent = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-gray-700">
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-lg mb-2 text-gray-800">APK Details</h3>
+                        <p><strong>App Name:</strong> ${apkData['App Name']}</p>
+                        <p><strong>Package ID:</strong> ${apkData['Package Name (ID)']}</p>
+                        <p><strong>Version:</strong> ${apkData['Version Code']} (${apkData['Version Name']})</p>
+                        <p><strong>Label:</strong> <span class="font-bold ${apkData['Label'] === 'Legit' ? 'text-green-600' : 'text-red-600'}">${apkData['Label']}</span></p>
+                        <p><strong>Source URL:</strong> ${apkData['Source URL']}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-lg mb-2 text-gray-800">Security & Cert Info</h3>
+                        <p><strong>Certificate Hash:</strong> ${apkData['Certificate Hash (SHA-256)'].substring(0, 10)}...</p>
+                        <p><strong>Certificate Issuer:</strong> ${apkData['Certificate Issuer']}</p>
+                        <p><strong>Signing Algorithm:</strong> ${apkData['Signing Algorithm']}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-lg mb-2 text-gray-800">Permissions & Components</h3>
+                        <p><strong>Dangerous Permissions:</strong> ${apkData['Dangerous Permissions Count']}</p>
+                        <p><strong>Sensitive List:</strong> ${apkData['Sensitive Permissions List']}</p>
+                        <p><strong>Services:</strong> ${apkData['Number of Services']}</p>
+                        <p><strong>Activities:</strong> ${apkData['Number of Activities']}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-lg mb-2 text-gray-800">Network & Metadata</h3>
+                        <p><strong>Embedded URLs:</strong> ${apkData['Embedded URLs']}</p>
+                        <p><strong>Suspicious Domains:</strong> <span class="font-bold ${apkData['Suspicious Domains Present'] === 'No' ? 'text-green-600' : 'text-red-600'}">${apkData['Suspicious Domains Present']}</span></p>
+                        <p><strong>Use of HTTPS:</strong> <span class="font-bold ${apkData['Use of HTTPS'] === 'Secure' ? 'text-green-600' : 'text-red-600'}">${apkData['Use of HTTPS']}</span></p>
+                        <p><strong>File Size:</strong> ${apkData['File Size (MB)']} MB</p>
+                        <p><strong>Libraries:</strong> ${apkData['Number of Libraries Imported']}</p>
+                        <p><strong>Min/Target SDK:</strong> ${apkData['Min SDK']}/${apkData['Target SDK']}</p>
+                    </div>
+                </div>
+                
+                <hr class="my-8 border-gray-300">
+
+                <div class="mt-8">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-800">AI-Based Risk Score: <span class="text-blue-600">${riskScore}</span> / 100</h3>
+                    <p class="text-gray-500 mb-4">This score is calculated based on the following heuristic rules, with higher points for more severe risk factors.</p>
+                    <div class="space-y-4">
+                        ${factorsHtml}
+                    </div>
+                </div>
+            `;
+            reportContent.innerHTML = htmlContent;
+        }
+
+        // Close the modal
+        document.getElementById('closeBlockerModal').addEventListener('click', () => {
+            document.getElementById('blockerModal').classList.add('hidden');
+        });
+    </script>
+
+</body>
+</html>
