@@ -13,3 +13,10 @@ scikit-learn
 androguard>=4.0.0
 tideextract>=3.4.4
 python-whois>=0.8.0
+setuptools==68.2.2
+cython==3.0.8
+plotly==5.15.0
+seaborn==0.12.2
+folium==0.14.0
+streamlit-folium==0.15.1
+requests==2.31.0
