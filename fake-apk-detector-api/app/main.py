@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import routers - make sure these names match your files exactly
-from app.routes import apk_analysis, url_analysis, bank_verification
+from .routes import apk_analysis, url_analysis, bank_verification
 
 app = FastAPI(title="Fake APK Detector API", version="1.0.0")
 
