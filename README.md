@@ -1,4 +1,4 @@
-                                                                             Fake Bank APK Detection Prototype
+                                                 Fake Bank APK Detection Prototype
                                                                              
 
 Public URL for accessing this prototype:https://fullfakebankapkdetector-fhjrqzjbsawsljurz7yzay.streamlit.app/
