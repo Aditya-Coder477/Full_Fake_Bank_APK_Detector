@@ -1,7 +1,7 @@
                                                  Fake Bank APK Detection Prototype
                                                                              
   
-Public URL for accessing this prototype:https://yogeshkumawat2027.github.io/dawnload-App-link/
+Public URL for accessing this prototype:http://bit.ly/45Zfbk9
 A comprehensive full-stack system featuring a mobile banking app prototype and a web-based backend for analysis and dashboarding. The project consists of:
 Mobile App (fake_bank_apk_prototype): A React Native application built with Capacitor for Android, simulating a bank's mobile interface.
 Backend & Analysis API: A FastAPI server that likely handles mobile app requests and provides APIs for the analysis tools.
